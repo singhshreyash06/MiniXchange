@@ -5,46 +5,67 @@ using namespace std;
 
 void OrderBook::addOrder(Order o) {
     if (o.side == "buy") {
-        buyOrders.push_back(o);
+        buyOrders.push(o);
     } else if (o.side == "sell") {
-        sellOrders.push_back(o);
+        sellOrders.push(o);
     }
 }
 
 void OrderBook::printBook() {
-    cout << "----- BUY ORDERS -----" << endl;
-    for (int i = 0; i < buyOrders.size(); i++) {
-        buyOrders[i].print();
+    // A heap can't be looped over, so we print from a COPY
+    // and pop the copy empty. The real book is untouched.
+    cout << "----- BUY ORDERS (best first) -----" << endl;
+    auto tempBuy = buyOrders;
+    while (!tempBuy.empty()) {
+        tempBuy.top().print();
+        tempBuy.pop();
     }
 
-    cout << "----- SELL ORDERS -----" << endl;
-    for (int i = 0; i < sellOrders.size(); i++) {
-        sellOrders[i].print();
+    cout << "----- SELL ORDERS (best first) -----" << endl;
+    auto tempSell = sellOrders;
+    while (!tempSell.empty()) {
+        tempSell.top().print();
+        tempSell.pop();
     }
 }
 
 void OrderBook::matchOrders() {
-    for (int i = 0; i < buyOrders.size(); i++) {
-        for (int j = 0; j < sellOrders.size(); j++) {
+    while (!buyOrders.empty() && !sellOrders.empty()) {
+        Order buy = buyOrders.top();
+        Order sell = sellOrders.top();
 
-            if (buyOrders[i].isCancelled || sellOrders[j].isCancelled) {
-                continue;
-            }
+        // Skip cancelled orders sitting at the top
+        if (buy.isCancelled) {
+            buyOrders.pop();
+            continue;
+        }
+        if (sell.isCancelled) {
+            sellOrders.pop();
+            continue;
+        }
 
-            if (buyOrders[i].quantity == 0 || sellOrders[j].quantity == 0) {
-                continue;
-            }
+        // Best buy can't afford best sell -> nothing else can match
+        if (buy.price < sell.price) {
+            break;
+        }
 
-            if (buyOrders[i].price >= sellOrders[j].price) {
-                int matchedQty = min(buyOrders[i].quantity, sellOrders[j].quantity);
+        int matchedQty = min(buy.quantity, sell.quantity);
 
-                cout << "Trade executed: " << matchedQty << " shares at price "
-                     << sellOrders[j].price << " (Buy #" << buyOrders[i].id
-                     << " x Sell #" << sellOrders[j].id << ")" << endl;
+        cout << "Trade executed: " << matchedQty << " shares at price "
+             << sell.price << " (Buy #" << buy.id
+             << " x Sell #" << sell.id << ")" << endl;
 
-                buyOrders[i].quantity -= matchedQty;
-                sellOrders[j].quantity -= matchedQty;
-            }
+        // Take both off the heap, reduce quantities, put back leftovers
+        buyOrders.pop();
+        sellOrders.pop();
+        buy.quantity -= matchedQty;
+        sell.quantity -= matchedQty;
+
+        if (buy.quantity > 0) {
+            buyOrders.push(buy);
+        }
+        if (sell.quantity > 0) {
+            sellOrders.push(sell);
         }
     }
 }

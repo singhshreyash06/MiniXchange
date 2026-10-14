@@ -7,14 +7,14 @@ using namespace std;
 class Order {
 public:
     int id;
-    string side;    
+    string side;      
     double price;
     int quantity;
     long timestamp;
     bool isCancelled;
 
     Order(int id, string side, double price, int quantity, long timestamp);
-    void print();
+    void print() const;
 };
 
 #endif

@@ -6,18 +6,22 @@ using namespace std;
 int main() {
     OrderBook book;
 
-    Order o1(1, "buy", 500.0, 10, 1001);
-    Order o2(2, "sell", 498.0, 5, 1002);
-    Order o3(3, "buy", 495.0, 20, 1003);
-    Order o4(4, "sell", 505.0, 8, 1004);
+    // Sell orders (added in a deliberately "wrong" order)
+    book.addOrder(Order(1, "sell", 505.0, 10, 1001));
+    book.addOrder(Order(2, "sell", 500.0, 5, 1002));
+    book.addOrder(Order(3, "sell", 502.0, 8, 1003));
 
-    book.addOrder(o1);
-    book.addOrder(o2);
-    book.addOrder(o3);
-    book.addOrder(o4);
+    // Buy orders
+    book.addOrder(Order(4, "buy", 503.0, 12, 1004));
+    book.addOrder(Order(5, "buy", 499.0, 10, 1005));
 
+    cout << "=== BEFORE MATCHING ===" << endl;
+    book.printBook();
+
+    cout << endl << "=== MATCHING ===" << endl;
     book.matchOrders();
 
+    cout << endl << "=== AFTER MATCHING ===" << endl;
     book.printBook();
 
     return 0;

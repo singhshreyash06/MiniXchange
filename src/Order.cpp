@@ -11,7 +11,7 @@ Order::Order(int id, string side, double price, int quantity, long timestamp) {
     this->isCancelled = false;
 }
 
-void Order::print() {
+void Order::print() const {
     cout << "Order #" << id << " | " << side << " | price: " << price
          << " | qty: " << quantity << " | time: " << timestamp << endl;
 }
